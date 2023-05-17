@@ -1,402 +1,293 @@
-<head>
-<title>#Fraud Assist Portal</title>
-<body bgcolor="LightGrey" scroll="no">
-<script language="VBScript">
+'*************************************************************
+'   This code blocks account,notates & emails customer									
+'		Created By: Brenden Boswell			
+'		Property of: Huntington Bank				
+'		Department: Electronic Loss Prevention		
+'								
+'************************************************************
+Dim num '#Telephone number
+Dim snum '#Secondary telephone number
+Dim nam '#Name
+Dim acct '#Card number
+'Dim mail 'send e-mail identifier
+Dim cstctr '#Cost center
+Dim accgrab '#Account number
+Dim strEmail '#Email grabber
+Dim stayCheck '
+Dim optIn 'Check opt status
+Dim optOut 'Return correct optOut Bypass code
+Dim objSys
+Dim objSess, objScr
+Dim error1 '# Error handling variable
 On Error Resume Next
-Dim objShell
-Dim obApp
-Dim yes
-Set objShell = CreateObject("WScript.Shell")
-set obApp = createobject("shell.application")
-Dim objSys : Set objSys = CreateObject ("PASSPORT.SYSTEM")
-Dim objSess : Set objSess = objSys.ActiveSession
-Dim objScr : Set objScr = objSess.Screen
-Dim Input
-Dim screenCapture
-Dim t
-Dim valid
-Dim open
-Dim gh
-Dim BP
-Dim looper
-Dim maiIt	
-'gh = "Blah"
-Const TITLE = "(A) Passport.zws - PASSPORT"
-Const TITLE_EXIST = "#Fraud Assist Portal"	
-intWidth = document.ParentWindow.Screen.AvailWidth
-intHeight = document.ParentWindow.Screen.AvailHeight
-intWidthW = document.ParentWindow.Screen.AvailWidth * .23
-intHeightW = document.ParentWindow.Screen.AvailHeight * .48
-document.ParentWindow.resizeto intWidthW, intHeightW
-posLeft = 15
-posTop = 15    
-window.moveTo posLeft, posTop
-document.ParentWindow.document.body.style.Font = "5pt 'Courier New'"
-document.ParentWindow.document.body.style.borderStyle = "outset"
-document.ParentWindow.document.body.style.borderWidth = "5px"
-</script>
+acct = Wscript.Arguments.Item(0)
+Dim mail : mail = Wscript.Arguments.Item(1)
+set WshShell = WScript.CreateObject("WScript.Shell")
+Set objSys = CreateObject ("PASSPORT.SYSTEM")
+Set objSess = objSys.ActiveSession
+Set objScr = objSess.Screen
+'ssn = Trim(ss2)
+ssn = "000000000"
+logn = objScr.GetString (20, 3, 1)
+logn2 = objScr.GetString (23, 2, 7)
 
-<HTA:APPLICATION 
-    APPLICATIONNAME="#Fraud Assist Portal"
-	ICON="http://www.htmlgoodies.com/favicon.ico"
-	version="1.1"
-    SCROLL="NO"
-    SINGLEINSTANCE="yes"
-    BORDER="thin"
-    BORDERSTYLE="raised"
-    CAPTION="yes"
-    CONTEXTMENU="yes" 
-	MAXIMIZEBUTTON="no"
-	MINIMIZEBUTTON="yes"
-    INNERBORDER="no"
-    NAVIGATABLE="no"
-    SCROLL="yes"
-    SCROLLFLAT="no"
-    SELECTION="no"
-    SHOWINTASKBAR="no"
-    SINGLEINSTANCE="yes"
-    SYSMENU="yes"
-    WINDOWSTATE="normal"
->
-</head>
-
-<html>
-<style type="text/css">
-Input.btn {
-height: 24px;
-Width: 140px;
-font-size: 8pt;
-}
-Input.btn1 {
-height: 23px;
-Width: 36px;
-font-size: 8pt;
-}
-Input.btn2 {
-height: 24px;
-Width: 48px;
-font-size: 8pt;
-}
-Input.txt {
-height: 23px;
-width: 215px;
-font-size: 8pt;
-}
-a:link {
-   color:inherit;
-}
-a:hover {
-background-color:#CCCCCC;
-}
-a:link {
-text-decoration:none;
-}
-a:visited {
-text-decoration:none;
-}
-
-</style>
-<div align="middle">
-<input type="hidden" id="USR" name="USR" value="0"> 
-<input type="hidden" id="AC" name="AC" value="0">
-<input type="hidden" id="CC" name="CC" value="0" disabled>
-<input type="hidden" id="GO" name="GO" value="0">
-<input type="hidden" id="BP" name="BP" value="0">
-<input type="hidden" id="clr" name="clr" value="0">
-<img src="http://icons.iconarchive.com/icons/iconshock/credit-card/512/mastercard-icon.png" height="40" width="40"></img>
-<font size=4><b> FRAUD PORTAL</b></font></div></html><hr> 
-<font size=1.5>
-<b>Options:</b>
-<i>  Info:</i><input tabindex="2" type="checkbox" name="select" value="select" title="Show Account Information">
-<i> | E-mail:</i><input tabindex="3" type="checkbox" name="select2" value="select" title="Automatically send E-Mail" checked>
-<hr><div align="left"><b>Card Number:</b> 
-<a href="#" onClick="clr" title="Clear Card Number" style="color:blue" name="cl">Clear</a>|<a href="#" onClick="button(5)" title="Search For Card Number" name="sr" style="color:blue">Find</a><a href="#" onClick="button(5)" title="Search For Card Number" style="display:none;" name="rt" style="color:blue">RETURN</a></font>
-<br>
-<input tabindex="1" type="text" class="txt" Size="22" Maxlength="16" name="fName" title="Enter Credit Card Number Here" style="width:203;height:22;font-size:15px">
-<select onActivate="LoadDropDown" name="PhoneNumbers" style="display:none;width:256;font-size:15px" onChange="Find"></select>
-<input type="button" class="btn1" value=">>" onClick="button(6)" name="gogo" style="" title="GoTo DCTR Screen"></div> 
-<input type="hidden" id="Cancel" name="Cancel" value="0"> 
-<input type="text" class="txt" Size="32" Maxlength="0" name="fInfo" onfocus="javascript:this.blur()" style="background-color: lightgrey; border: 0px; cursor: none" readonly><br><br>								  
-<div align="center">
-<input tabindex="4" type="button" class="btn" style ="" value=" REVOKE Card " onClick="button(2)" name="bb" title="Block MasterCard"><br><br><br>
-<input tabindex="5" type="submit" class="btn" style ="" value="ACTIVATE Card" onClick="VBScript:AC.Value=4" name="aa" title="Re-Activate MasterCard"><br><br><br>
-<input tabindex="6" type="button" class="btn" style ="" value="  CLOSE Card   " onClick="button(5)" name="hg" title="Close MasterCard"><br><br><br>
-<input tabindex="7" type="button" class="btn" style ="" value="    BILL PAY     " onClick="billPay()" title="GoTo Bill Pay Screen"><br><br><br><hr>
-<input tabindex="8" type="button" class="btn2" id="CancelButton" value=" EXIT " onClick="Close()"><hr></div>
-<input type="text" class="txt" Size="32" Maxlength="0" onfocus="javascript:this.blur()" name="fStatus" style="background-color: lightgrey; border: 0px" readonly><br>
-
-</body>
-<SCRIPT LANGUAGE="VBScript">
-    Sub Find
-        For Each objOption in PhoneNumbers.Options
-            If objOption.Selected Then
-			test76 = Split(objOption.Value," ")
-				'test76 = Split(objOption.InnerText," ")
-				fName.Value = test76(0)
-            End If
-        Next
-    End Sub
-
-</SCRIPT>
-<script language="VBScript">
-	'Document.Focus
-	'Document.All.fName.Focus
-</script>
-<script language="VBScript">
-Sub ExitHTA
-    self.close()
-Set objShell = Nothing
-Set obApp = Nothing
-End Sub
-</script>
-<script language="VBScript">
-Sub button(intIndex)
-yes = select2.checked
-If yes = true Then
-	mailIt = "2"
+'==============================
+' MAIN ENTRANCE
+'==============================
+On Error Resume Next
+If (logn <> "=" AND logn2 <> "Command" AND Err = 0) Then
+Main()
 Else
-	mailIt = "0"
-End If 	
-	'Select Case intIndex
-	If intIndex = 2 Then 
-	'Start Case statement @ 2, will throw error if using 1
-		'Case 2 
-		'# Block MasterCard Case
-			bb.disabled = true
-			Input = fName.Value
-			If isNumeric(Input) Then
-				Name = fInfo.Value	
-				t = MsgBox ("Click (Yes) to block the following:" & vbCrLF _ 
-				& vbCrLF & Name & vbCrLF _ 
-				& "Card Number: " & Input,4,"Revoke Last(4): " & Right(Input, Len(Input)-12))
-			If t = vbYes Then 
-					Call block(Input, mailIt)
-					Else
-			End If
-				Else
-				MsgBox "Error: Invalid Account/Card Number"
-			End If
-				bb.disabled = false
-				USR.Value = 0
-ElseIf intIndex = 3 Then
-		'Case 3 
-		'# GoTo Billpay Screen Case
-			billPay()
-			BP.Value = 0
-ElseIf intIndex = 4 Then
-		'Case 4 
-		'# Activate MasterCard Case
-			Input = fName.Value
-			Call activate(Input)
-			AC.Value = 0
-'========================================================
-' MAIN CASE FUNCTON WHICH CONTROLS "FIND" DYNAMIC BUTTONS
-'========================================================
-ElseIf intIndex = 5 Then
-		'Case 5 
-		'# Close MasterCard Case
-	If fName.style.display = "none" Then
-	' MAIN SCREEN DISPLAY
-		PhoneNumbers.style.display = "none"
-		rt.style.display = "none"
-		sr.style.display = ""
-		cl.style.display = ""
-		fName.style.display = ""
-		bb.disabled = false
-		aa.disabled = false
-		hg.disabled = false
-		fInfo.style.display = ""
-		fStatus.Value = ""		
-	Else
-	' HIDE INPUT - DISABLE BUTTONS
-		fName.style.display = "none"
-		sr.style.display = "none"
-		rt.style.display = ""
-		cl.style.display = "none"
-		PhoneNumbers.style.display = ""
-		bb.disabled = true				
-		aa.disabled = true
-		hg.disabled = true
-		fInfo.style.display = "none"
-		fStatus.Value = "    << ACCOUNT SEARCH MODE >>"
-	End If
-		'# Close MasterCard Case
-			'fName.style.display = "none"
-			'Form.Select1.add = "TEST"
-			'PhoneNumbers.Value = 0
-'=====================================================
-' END OF DYNAMIC BUTTON CONTROLS
-'=====================================================
-ElseIf intIndex = 6 Then
-		'Case 6 
-		'# GoTo DCTR Screen Case
-			document.body.style.cursor = "wait"
-			Input = fName.Value
-			gogo.disabled = true
-			fStatus.Value = ""
-		If (info = true AND Input <> "") Then
-			objSess.Visible = False
-			fInfo.Value = "Loading.."
-		'Call errorChk(Input, chk, screenCapture)
-			fInfo.Value = "Loading..."
-		Call dctr(Input)
-			objShell.Wscript.Sleep 100
-			fInfo.Value = "Loading." '& r
-			objShell.Wscript.Sleep 100
-			fInfo.Value = "Loading............"
-			objShell.Wscript.Sleep 100
-			fInfo.Value = "Loading........................"
-		    fStatus.Value = chk
-			fStatus.title = "Credit Card " & chk
-			fInfo.Value = "Name: " & Trim(screenCapture)
-			fInfo.title = RTrim(screenCapture)
-			objSess.Visible = True
-		ElseIf (info = false AND Input <> "") Then
-			fInfo.Value = "Loading.."
-			fInfo.Value = "Loading......."
-		Call dctr(Input)
-			'Wscript.Sleep 100
-			'Wscript.Sleep 100
-			fInfo.Value = "Loading............"
-			WaitSeconds 1
-			'Wscript.Sleep 100
-			fInfo.Value = "Loading........................"
-			fInfo.Value = ""
-		Else
-		MsgBox "A Card or Account number is needed"
-	End IF
-			'Wscript.Sleep 10
-			gogo.disabled = false
-			document.body.style.cursor = "default"
-			GO.Value = 0
-ElseIf intIndex = 7 Then
-			'Case 7 
-			'# Clear form data Case
-			
-		If rt.style.display <> "none" Then
-			MsgBox "Works"
-		Else
-			fName.Value = ""
-			fInfo.Value = ""
-			fStatus.Value = ""
-		End If
-			clr.Value = 0
-Else
+MsgBox "Error: You need to log into Passport"
 End If
-'	Case Else
-'		 End Select
+
+Sub Main()
+checkstart()
+If (acct = vbNullString Or ssn=vbNullString) Then
+MsgBox "ATTENTION: Account number & Social are required in order to continue",vbExclamation
+Else 
+blockStart()
+End if
 End Sub
 
-Sub WaitSeconds( seconds )
-    Dim wshShell
-    Set wshShell = CreateObject( "WScript.Shell" )
-    wshShell.Run "ping -n " & ( seconds + 1 ) & " 127.0.0.1", 0, True
-    Set wshShell = Nothing
+Sub checkstart()
+If acct = "" Then
+Do
+acc1=InputBox("ENTER A CARD NUMBER TO BLOCK ")
+'ss2=InputBox("ENTER YOUR SOCIAL SECURITY NUMBER ")
+If acc1 = vbNullString Then
+Exit Sub
+ElseIf (Len(Trim(acc1)) <> 16) Then
+acc1=InputBox("ENTER A VALID CARD NUMBER TO BLOCK ")
+acct = Trim(acc1)
+Else
+acct = Trim(acc1)
+End If
+Loop Until(Len(acct) = 16)
+End If
 End Sub
 
-Sub clr()
- 	If fName.style.display = "none" Then
-			MsgBox "Error: Nothing to clear"
-	Else
-			fName.Value = ""
-			fInfo.Value = ""
-			fStatus.Value = ""
+'======= Error Checking & Account status Checking Sub ===============
+'====================================================================
+Sub errorChk()
+Dim chkB
+accgrab = objScr.GetString (5,15, 11)
+chkB = objScr.GetString (5,80, 1)
+
+If error1 = 1 Then
+	MsgBox "Canceling Per User Request"
+Exit Sub
+ElseIf chkB = "E" Then
+	MsgBox "ATTENTION: This card have already been Blocked ",vbInformation
+	stayCheck = "yes"
+	MainScreen()
+ElseIf chkB = "C" Then
+	MsgBox "ATTENTION: This card have already been Closed ",vbInformation
+	stayCheck = "yes"
+	MainScreen()
+ElseIf chkB = "U" Then
+	MsgBox "ATTENTION: This card has been marked Stolen",vbInformation
+	stayCheck = "yes"
+	MainScreen()	
+ElseIf chkB = "L" Then
+	MsgBox "ATTENTION: This card have already been marked Lost ",vbInformation
+		stayCheck = "yes"
+	MainScreen()
+ElseIf chkB = "P" Then
+    RemoveP()
+ElseIf chkB = " " Then
+	BlockCard()
+Else
 	End If
 End Sub
 
-Sub block(Input, mailIt)
-Dim location : location = """C:\Documents and Settings\HB08819\Desktop\BC.vbs"""
-Dim IT : IT = Input & " " & mailIt
-If Input = "" Then
-Call passFocus(objShell)
-objShell.Run location & Input & mailIt
-ElseIf (isNumeric(Input) AND Trim(Len(Input)) = 16 OR Trim(Len(Input)) = 11) Then
-'Set objShell = CreateObject("WScript.Shell")
-'objShell.Run location & Input & mailIt
-objShell.Run location & IT
-Call passFocus(objShell)
-Else
-MsgBox "Error: Invalid Account/Card Number"
-End If
-	'Set objShell = Nothing
+Sub RemoveP()
+	objScr.SendKeys ("<tab>")
+	objScr.SendKeys ("E <enter>")
+	Notate()
 End Sub
 
-Function passFocus(objShell)
-'Set objShell = CreateObject("WScript.Shell")
-If open = 18 Then
-open = objShell.AppActivate(TITLE_EXIST)
-objShell.AppActivate(TITLE_EXIST)
+Sub chkMe()
+Dim chk
+chk = objScr.GetString (8,20, 1)
+	If chk <> " " Then
+	emailClient()
 Else
-objShell.AppActivate(TITLE)
-Document.Focus
+	MsgBox "Customer does not have an email address on file ",vbInformation
+End If
+End Sub
+
+Sub accExist()
+Dim exErr
+exErr = objScr.GetString (24,2, 7)
+If (exErr = "PLASTIC") Then
+'MsgBox "Please Enter a valid account number",vbInformation
+acc0=InputBox("RE-ENTER A VALID ACCOUNT NUMBER ")
+acct = Trim(acc0)
+	blockStart()
+Else
+End If
+End Sub
+
+'=============================
+Sub ssnExist()
+Dim ssErr
+ssErr = objScr.GetString (24,2, 1)
+If (ssErr = "I" Or ssErr = "T") Then
+'MsgBox "Please Enter a valid Social Security number",vbInformation
+ssn0=InputBox("RE-ENTER A VALID SOCIAL SECURITY NUMBER ")
+ssn = Trim(ssn0)
+	Notate()
+Else
+Exit Sub
+End If
+End Sub
+
+Sub copyRight()
+nam = objScr.GetString (4, 18, 32)
+num = objScr.GetString (7, 70, 10)
+snum = objScr.GetString (8, 70, 10)
+strEmail = objScr.GetString (8, 20, 35)
+optIn = objScr.GetString (8, 18, 1)
+
+	If optIn <> " " Then
+		optOut = "CS2468"
+	Else
+		optOut = " "
+	End If
+rightMe()
+End Sub
+
+Sub rightMe()
+   Dim intWidth, intHeight, intWidthW, intHeightW
+    strIETitle = "Call Reminder Window"
+    myPrompt = "REMINDER: CALL CUSTOMER"
+    Set objIE = CreateObject("InternetExplorer.Application")
+    objIE.ToolBar = False
+    objIE.StatusBar = False
+    objIE.Resizable = False
+    objIE.Navigate("about:blank")
+  Do Until objIE.readyState = 4
+        WScript.Sleep 10
+  Loop
+    intWidth = objIE.document.ParentWindow.Screen.AvailWidth
+    intHeight = objIE.document.ParentWindow.Screen.AvailHeight
+    intWidthW = objIE.document.ParentWindow.Screen.AvailWidth * .40
+    intHeightW = objIE.document.ParentWindow.Screen.AvailHeight * .35
+    objIE.document.ParentWindow.resizeto intWidthW, intHeightW
+    objIE.document.ParentWindow.moveto (intWidth - intWidthW)/2, (intHeight - intHeightW)/2
+	objIE.Document.Body.InnerHTML = "<div align='center'><p><b>" & myPrompt & "</p></b></div>" & vbCrLf _
+				& "<b>Name:</b>" & nam & "" & "<br><b>Primary Number:</b>" & num & "" & "<br><b>Secondary Number:</b>" & snum & "" _
+				& "<br><b>Cost Center:</b>" & cstctr & "" & "<br><b>Card Number:</b>" & acct & ""_
+				& "<p><input type='hidden' id='OK' " & "name='OK' value='0'>" _ 
+				& "<div align='center'><input type='submit' value='Close Window' " & "OnClick='VBScript:OK.Value=1'></p></div>" 
+    objIE.document.ParentWindow.document.body.style.backgroundcolor = "LightBlue"
+    objIE.document.ParentWindow.document.body.scroll="no"
+    objIE.document.ParentWindow.document.body.style.Font = "15pt 'Courier New'"
+    objIE.document.ParentWindow.document.body.style.borderStyle = "outset"
+    objIE.document.ParentWindow.document.body.style.borderWidth = "4px"
+    objIE.document.Title = strIETitle
+    objIE.Visible = True
+    Set objShell = CreateObject("WScript.Shell")
+    objShell.AppActivate objIE.document.Title
+    objIE.Document.Focus
+On Error Resume Next 
+     Do While objIE.Document.All.OK.Value = 0  
+         If Err Then ' user clicked red X (or alt-F4) to close IE window 
+             objIE.Quit 
+             Set objIE = Nothing 
+             Exit Sub
+         End if 
+		 Wscript.Sleep 50
+     Loop 
+     On Error Goto 0 
+     'MultiLineInput = objIE.Document.All("OK").Value ' Read the user input from the dialog window 
+     objIE.Quit
+     Set objIE = Nothing 
+
+End Sub
+
+Sub emailClient()
+'Double Check
+	If (Trim(strEmail) <> "" AND mail = "2") Then
+		  ' Create a new Microsoft Outlook message containing the contents of the current PASSPORT screen
+		filepath = "C:\BlockTemplate.oft"
+		title = "Important Message"
+		Set myApp = CreateObject("Outlook.Application")
+		Set newItem = myApp.CreateItemFromTemplate(filepath)
+		newItem.SentOnBehalfOfName = "Electronic Loss Prevention"
+		newItem.Subject = newItem.Subject & " " & optOut
+		newItem.To = strEmail
+		newItem.Display
+		'MyItem.Send // Will display Accept/Deny Alert
+	Set WshShell = CreateObject("WScript.Shell")
+	WshShell.AppActivate title
+	Wscript.Sleep 400
+	WshShell.SendKeys "%s" 'Triggers Alt+S /Send
+	End If
+Set WshShell = Nothing
+Set objHTML = Nothing
+End Sub
+
+Function blockStart()
+	objScr.SendKeys ("<clear>")
+	objScr.SendKeys ("PL20<enter>")
+	objScr.SendKeys (acct+ "<enter>")
+WScript.Sleep 1
+	accExist()
+	errorChk()
+End Function
+
+Function BlockCard()
+	objScr.SendKeys ("<tab>")
+	objScr.SendKeys ("E<enter>")
+	Notate()
+End Function
+
+Function Notate()
+Dim Text, ret
+	objScr.SendKeys ("<clear>")
+	objScr.SendKeys ("DC84<enter>")
+	objScr.SendKeys (acct+ "<enter>")
+	objScr.SendKeys ("" +ssn)
+	objScr.SendKeys ("FALCON REVIEW, CARD STATUS CHANGED DUE TO SUSPICIOUS <tab>")
+	objScr.SendKeys ("ACTIVITY PER ELECTRONIC LOSS PREVENTION, 614.331.5300")
+	objScr.SendKeys ("<PF4>")
+	WScript.Sleep 1
+	'ssnExist()
+	
+set ssn = Nothing
+Set cstctr = Nothing
+	grabCst()
+	MainScreen()
+End Function
+
+Sub grabCst()
+	  objScr.SendKeys ("<clear>")
+	  objScr.SendKeys ("DD05<enter>")
+	  objScr.SendKeys (accgrab+ "<enter>")
+	  objScr.SendKeys ("<PF3>")
+cstctr = objScr.GetString (15,10, 6)
+WScript.Sleep 1
+End Sub
+	
+Function MainScreen()
+If stayCheck = "yes" Then
+	objScr.SendKeys ("<clear>")
+	objScr.SendKeys ("DCTR<enter>")
+	objScr.SendKeys (acct+ "<enter>")
+Else
+objScr.SendKeys ("<clear>")
+objScr.SendKeys ("DCTR<enter>")
+objScr.SendKeys (acct+ "<enter>")
+WScript.Sleep 1
+copyRight()
+chkMe() ' Turned off during testing phase
 End If
 End Function
 
-    Sub Window_Onload
-       LoadDropDown
-    End Sub
-
-    Sub LoadDropDown
-	On Error Resume Next
-       ClearListBox
-       Set objFS   = CreateObject("Scripting.FileSystemObject")
-       Set objFile = objFS.OpenTextFile("C:\Temp\chist.jhg")
-       strAccInfo = objFile.ReadAll
-	   objFile.Close
-	   arrAccInfo = Split(strAccInfo, vbNewLine)
-       For Each strInfo in arrAccInfo	   
-          Set objOption = Document.createElement("OPTION")
-		  objOption.Text = strInfo 'This alters the displayed values
-          objOption.Value = strInfo
-          PhoneNumbers.Add(objOption)
-       Next
-
-    End Sub
-
-Sub ClearListbox
-    For Each objOption in PhoneNumbers.Options
-        objOption.RemoveNode
-    Next 
-End Sub
-
-Sub dctr(Input)
-'Dim location : location = """C:\Program Files\PASSPORT\dctr_mem.vbs"""
-If Input = "" Then
-'call passFocus(objShell)
-objShell.Run location
-MsgBox "What is this?"
-'Set objShell = Nothing
-ElseIf (isNumeric(Input) AND Trim(Len(Input)) = 16 OR Trim(Len(Input)) = 11) Then
-	objScr.SendKeys ("<clear>")
-	objScr.SendKeys ("DCTR<enter>")
-	objScr.SendKeys (Input+"<enter>")
-	'call passFocus(objShell)
-'Set objShell = Nothing
-'Set objScr = Nothing
-Else
-MsgBox "Error: Invalid Account/Card Number"
-End If
-End Sub
-
-
-'Sub DisableButton
-    'gogo.Disabled = TRUE
-'			If fName.Value = "" Then
-'				bb.disabled = true
-'				aa.disabled = true
-'				hg.disabled = true
-'			Else
-'				bb.disabled = false
-'				aa.disabled = true
-'				hg.disabled = false
-'			End If
-'	Msgbox "Closed"
-'End Sub
-
-Sub billPay()
-objScr.SendKeys ("<clear>")
-objScr.SendKeys ("rpfl<enter>")
-objScr.SendKeys ("<PF10>")
-End Sub
-</script>
-</html>
+set WshShell = Nothing
+Set objSys = Nothing
+Set objSess = Nothing
+Set objScr = Nothing
+Set acct = Nothing
