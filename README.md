@@ -1,2 +1,2 @@
 # DebitCardBlocker
-A tool using VBscript and Javascript DOM components with some inline css and html. Assists employess to quickly block compromised debit or credit cards. This automation tool was created in order to scrape an IBM AS400 type of screen.
+A tool using VBscript and Javascript DOM components with some inline css and html. While scraping an IBM AS400 screen, this tool Assists employess to quickly block compromised debit or credit cards.
